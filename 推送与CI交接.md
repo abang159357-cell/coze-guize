@@ -131,3 +131,40 @@ GitHub Actions 报 `ERR_PNPM_BAD_PM_VERSION`，workflow 直接失败。
 
 - **本地验证未过不发 push**；用户未确认不停留部署。
 - CI 是第二道防线，不等同 test_run；部署执行走 `general-deploy` skill 的 `[deploy]` 配置；线上验收按「上线前规定」条款逐项给可验证结论。
+
+---
+
+## 六、PR 提交流程（无人值守开发与人类验收的 git 层闸门）
+
+> 目标：把「计划定案 → 无人值守开发 → **人类 review + 验收** → 部署」落到 git 上，避免 AI 直接 push main 绕过人工把关。适用于已开启分支保护（main 仅能经 PR 合并）的仓库；未开启保护的仓库也**推荐**走此流程，让每次合并留下 review 记录。
+
+### 1. 功能分支规范
+
+- 从最新 `main` 起分支：`git checkout -b feat/<短名> origin/main`（每功能一分支，命名 `feat/`、`fix/`、`chore/`、`docs/`）。
+- 功能分支只在授权范围内开发；无人值守开发在功能分支进行，**不直接改 main**。
+
+### 2. 开发后在功能分支提交、推远端
+
+- 提交规范同「一、提交规范」；逐 commit 推送。
+- 推远端：`git push -u origin feat/<短名>`。
+
+### 3. 开 PR（人类可先在 GitHub 网页 review，或命令触发）
+
+- 网页：push 后 GitHub 会提示 `Create pull request`，或访问 `https://github.com/<owner>/<repo>/pull/new/<分支>`。
+- PR 描述按仓库的 `PULL_REQUEST_TEMPLATE` 填：变更摘要 / 关联 Issue / 测试证据 / 影响范围 / 验收清单。
+
+### 4. 等 CI 通过
+
+- PR 自动触发 `pull_request: main` 的 CI；等 `test` + `security`(CodeQL) job 全绿。
+- 若开了分支保护"Require status checks"，CI 未绿会被 GitHub 强制拦截 merge。
+
+### 5. 人类 review 与 merge
+
+- **AI 不自行合入 main**。由人类在 GitHub 网页 review 后点 **`Merge pull request`**（有分支保护时满足条件才可点）。
+- 合并后：删除已合并的分支 `git push origin --delete feat/<短名>`，并拉回同步 `git checkout main && git pull`。
+
+### 6. 边界与例外
+
+- 仅当人类**明确要求"直接 push main 不走 PR"**时才绕过本流程（如临时小修、纯文档），且仍需保证本地验证 + CI 通过。
+- 分支保护需在 GitHub 仓库 Settings → Branches 单独开启（见仓库层配置，不在代码文件内）。本流程假定保护已开；未开时本流程仍是推荐的最佳实践。
+- 流程对「无人值守」的意义：AI 开发全程在功能分支完成，把"No / 验收决定权"显式保留给人类在 merge 一刻行使。
