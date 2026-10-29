@@ -9,7 +9,7 @@
 ## 目录结构
 
 ```
-dev-general-rules/
+coze-guize/
 ├── README.md                       # 本说明
 ├── _依据核实.md                    # 各规则的官方依据与来源（防自研猜想）
 ├── 通用研发协议.md                  # 核心规则（主文档，建议并入新项目 AGENTS.md）
