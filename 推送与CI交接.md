@@ -2,7 +2,7 @@
 
 > 面向「Next.js + TypeScript + pnpm」Web 项目（或其他用 GitHub Actions 触发 CI 的 Node 项目）的**真实可操作**交接流程。基于大其力生活平台项目线上实测沉淀；其他项目照此执行即可，无需再从零踩坑。
 >
-> 本文件只讲「推送 + CI」。扣子平台的**重新部署与线上验收**归 `general-deploy` skill 与「上线前评估」清单负责，此处不展开；二者衔接点见文末「全链路节奏」。
+> 本文件只讲「推送 + CI」、到 **CI / 本地验收变绿为止**。扣子平台的**重新部署与线上验收**归 `general-deploy` skill 与「上线前规定」清单承接，此处不展开；二者衔接点见文末「全链路节奏」。
 
 ---
 
@@ -130,4 +130,4 @@ GitHub Actions 报 `ERR_PNPM_BAD_PM_VERSION`，workflow 直接失败。
 ```
 
 - **本地验证未过不发 push**；用户未确认不停留部署。
-- CI 是第二道防线，不等同 test_run；部署执行走 `general-deploy` skill 的 `[deploy]` 配置；线上验收按「上线前评估」清单逐项给可验证结论。
+- CI 是第二道防线，不等同 test_run；部署执行走 `general-deploy` skill 的 `[deploy]` 配置；线上验收按「上线前规定」条款逐项给可验证结论。
