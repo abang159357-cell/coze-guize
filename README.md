@@ -13,6 +13,7 @@ dev-general-rules/
 ├── README.md                       # 本说明
 ├── _依据核实.md                    # 各规则的官方依据与来源（防自研猜想）
 ├── 通用研发协议.md                  # 核心规则（主文档，建议并入新项目 AGENTS.md）
+├── 推送与CI交接.md                  # 推送 GitHub + 触发 CI + 构建期 env 坑（真实可操作交接）
 ├── templates/
 │   └── AGENTS.md.template          # 可直接套用到新项目的 AGENTS.md 骨架
 └── checklists/
@@ -25,6 +26,8 @@ dev-general-rules/
 1. **初始化时并进 AGENTS.md**：把项目读者的首条指令设为"套用通用研发协议"，把 `通用研发协议.md` 的内容并进新项目根 `AGENTS.md` 的固定章节。
 2. **开发中遵守**：按「自动推进规则」推进，每轮改动交付前按 `checklists/交付前自检.md` 自检，改动核心逻辑时给出测试证据。
 3. **上线前收口**：按 `checklists/上线前审计.md` 逐项核对，通过后才交付。
+
+> 需要把改动推上 GitHub / 接通 CI 的项目，另读 **`推送与CI交接.md`**——含逐一 push 流程、CI 触发与节奏、pnpm 版本对齐、`NEXT_PUBLIC_` 构建期 env 坑（均为线上实测可照做的操作，非泛泛规则）。
 
 ## 关键要点（一句话）
 
