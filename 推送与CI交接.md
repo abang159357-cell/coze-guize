@@ -85,7 +85,7 @@ GitHub Actions 报 `ERR_PNPM_BAD_PM_VERSION`，workflow 直接失败。
 
 ### 改法
 
-改两处保持一致后重新 push / 重开 workflow。注意：**改 ci.yml 属于 `.github/workflows/`**，若当前 GitHub 凭据缺 `workflow` scope 会 push 失败——此时代码改好提交后，需在 GitHub 网页手动编辑该文件提交，再用 pull 拉回本地对齐。
+改两处保持一致后重新 push / 重开 workflow。注意：**改 ci.yml 属于 `.github/workflows/`**，push 需要 GitHub 凭据含 `workflow` scope——本项目已用 `~/.git-credentials` 里的 PAT（`coze-mcp-github`，含 repo + workflow scope），**可直接 `git push` 推 ci.yml**，无需网页手动编辑；若换用缺 workflow scope 的凭据才需网页手动改文件再 pull 拉回对齐。
 
 ### 连带注意
 
