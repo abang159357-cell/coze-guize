@@ -13,12 +13,13 @@
 - 提交信息统一前缀：`feat` / `fix` / `docs` / `chore` / `refactor` / `test`，冒号后写中文摘要，例：`fix: 首页搜索框接入可点击搜索`。
 - **一次提交只做一个目标**（防目标漂移），别把无关改动混进同一 commit。
 
-### 2. 推送原则（核心，务必遵守）
+### 2. 推送原则（核心）
 
-- **逐一推送**：多个待推送 commit 时，一个一个推，每推一个看一次输出确认成功（如 `c3f922d..6811e8c  6811e8c -> main`），**不要 `git push` 一把梭所有**。理由：commit 多时出错难定位、难回滚；逐一推可让 CI 逐个提交验证，出错即定位到具体那次改动。
-- **快进式递进，绝不 force push、绝不 amend 已推送 commit**。要推某个具体 commit 到某个分支用：`git push origin <commit-hash>:main`。
-- **推送到哪个分支（默认规则）**：默认**功能分支**（`git push -u origin feat/xxx` 后开 PR），直推 `main` 仅在人类明确说"直接推 main / 不走 PR"时使用（见 §六 与协议「分支流程默认档」）。上述 `push <commit>:main` 仅适用于这个明确例外场景，不作为常规操作。
-- 推送前先 `git pull`（或确认本地 `main` 与 `origin/main` 关系），避免分叉。
+- **以 PR 为审核与 CI 单元，按功能分支批量推送**：开发在功能分支完成后用 `git push -u origin feat/xxx` 一次推送该分支全部 commit，随后开 PR。PR 是代码审查 + CI 触发的最小单位，**不要求逐个 commit 推送、也不要求逐 commit 等 CI**——Git 允许一次安全推送多个连续 commit 且保留全部历史，逐个推送并非通用成熟实践。
+- **批量推送不等于放弃检查**：push 前按 §4「提交前自查」核对待推 commit 的文件清单，只含目标改动、无夹带；CI 定位按工作流失败步骤日志（出错即定位到具体 job/步骤），不靠逐提交隔离。
+- **快进式递进，绝不 force push、绝不 amend 已推送 commit**。要推某个具体 commit 到某分支用：`git push origin <commit-hash>:<branch>`。
+- **推送到哪个分支（默认规则）**：默认**功能分支**（`git push -u origin feat/xxx` 后开 PR），直推 `main` 仅在人类明确说"直接推 main / 不走 PR"时使用（见 §六 与协议「分支流程默认档」）。`push <commit>:<branch>` 仅适用于该明确例外场景，不作为常规操作；`<branch>` 以实际目标分支为准（默认为功能分支名），不自作主张归于 main。
+- 推送前先 `git pull`（或确认本地分支与 `origin/同名分支` 关系），避免分叉。
 
 ### 3. 推送后必须确认「完全同步」
 
@@ -27,7 +28,7 @@ git status -sb                       # 应显示 ## main...origin/main（无 ahe
 git log --oneline @{u}..HEAD | wc -l # 应输出 0，表示无未推送提交
 ```
 
-若 not 0，说明还有没推上去的，回到逐一 push 流程补齐。
+若 not 0，说明还有没推上去的，回到批量 push 流程补齐。注：`git status -sb` 提示分支名以实际目标分支为准，不自作主张归于 main。
 
 ### 4. 提交前自查（防止推到远端才发现）
 
@@ -127,7 +128,7 @@ GitHub Actions 报 `ERR_PNPM_BAD_PM_VERSION`，workflow 直接失败。
 
 ```
 修改 → 复查(仅读/确认) → 本地验证(test_run: lint+ts-check+探活+接口冒烟)
-     → 逐一 push(GitHub, 触发 CI) → 等 CI 绿 → 重新部署 → 线上验收
+     → 按分支 push(GitHub, 触发 CI) → 等 CI 绿 → 重新部署 → 线上验收
 ```
 
 - **本地验证未过不发 push**；用户未确认不停留部署。
@@ -146,7 +147,7 @@ GitHub Actions 报 `ERR_PNPM_BAD_PM_VERSION`，workflow 直接失败。
 
 ### 2. 开发后在功能分支提交、推远端
 
-- 提交规范同「一、提交规范」；逐 commit 推送。
+- 提交规范同「一、提交规范」；在功能分支上按逻辑拆分提交（同一功能可多个 commit，一次提交只做一件事，见「一·提交规范」）。
 - 推远端：`git push -u origin feat/<短名>`。
 
 ### 3. 开 PR（人类可先在 GitHub 网页 review，或命令触发）
