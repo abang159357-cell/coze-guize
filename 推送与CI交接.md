@@ -136,7 +136,7 @@ GitHub Actions 报 `ERR_PNPM_BAD_PM_VERSION`，workflow 直接失败。
 
 ## 六、PR 提交流程（无人值守开发与人类验收的 git 层闸门）
 
-> 目标：把「计划定案 → 无人值守开发 → **人类 review + 验收** → 部署」落到 git 上，避免 AI 直接 push main 绕过人工把关。适用于已开启分支保护（main 仅能经 PR 合并）的仓库；未开启保护的仓库也**推荐**走此流程，让每次合并留下 review 记录。
+> 目标：把「计划定案 → 无人值守开发 → **人类 review + 验收** → 部署」落到 git 上，避免 AI 直接 push main 绕过人工把关。适用于已开启分支保护（main 仅能经 PR 合并）的仓库；未开启保护的仓库也**推荐**走此流程，让每次合并留下 review 记录。**注意：分支保护（rulesets / Require status checks）在个人私有仓库免费档不强制生效（GitHub 需 Team/Enterprise 组织账号或 Public 才会 enforce），未开启时此流程靠纪律自觉执行，不靠 GitHub 硬拦截。**
 
 ### 1. 功能分支规范
 
@@ -155,16 +155,16 @@ GitHub Actions 报 `ERR_PNPM_BAD_PM_VERSION`，workflow 直接失败。
 
 ### 4. 等 CI 通过
 
-- PR 自动触发 `pull_request: main` 的 CI；等 `test` + `security`(CodeQL) job 全绿。
-- 若开了分支保护"Require status checks"，CI 未绿会被 GitHub 强制拦截 merge。
+- PR 自动触发 `pull_request: main` 的 CI；等实际上跑的 job 全绿（本项目 `security` CodeQL job 为**显式开关**，默认 `vars.ENABLE_CODEQL != 'true'` 时整 job 跳过、不进 run，故绿以 `test` job 为准）。
+- 若开了分支保护"Require status checks"，CI 未绿会被 GitHub 强制拦截 merge；但个人私有仓库免费档不会 enforce 分支保护，此拦截不生效，靠纪律。
 
 ### 5. 人类 review 与 merge
 
-- **AI 不自行合入 main**。由人类在 GitHub 网页 review 后点 **`Merge pull request`**（有分支保护时满足条件才可点）。
+- **AI 不自行合入 main**。由人类在 GitHub 网页 review 后点 **`Merge pull request`**（有分支保护且满足条件时才可点；个人私有仓库免费档不 enforce，靠纪律自觉合入留 review 记录）。
 - 合并后：删除已合并的分支 `git push origin --delete feat/<短名>`，并拉回同步 `git checkout main && git pull`。
 
 ### 6. 边界与例外
 
 - 仅当人类**明确要求"直接 push main 不走 PR"**时才绕过本流程（如临时小修、纯文档），且仍需保证本地验证 + CI 通过。
-- 分支保护需在 GitHub 仓库 Settings → Branches 单独开启（见仓库层配置，不在代码文件内）。本流程假定保护已开；未开时本流程仍是推荐的最佳实践。
+- 分支保护需在 GitHub 仓库 Settings → Branches 单独开启（见仓库层配置，不在代码文件内）。本流程假定保护已开；未开时本流程仍是推荐的最佳实践。**个人私有仓库免费档的分支保护 rulesets 不强制生效**（GitHub 需移入 Team/Enterprise 组织、或仓库改 Public 才会 enforce），当前靠纪律自觉执行，勿误以为 GitHub 会硬拦截。
 - 流程对「无人值守」的意义：AI 开发全程在功能分支完成，把"No / 验收决定权"显式保留给人类在 merge 一刻行使。
