@@ -170,3 +170,34 @@ GitHub Actions 报 `ERR_PNPM_BAD_PM_VERSION`，workflow 直接失败。
 - 仅当人类**明确要求"直接 push main 不走 PR"**时才绕过本流程（如临时小修、纯文档），且仍需保证本地验证 + CI 通过。
 - 分支保护需在 GitHub 仓库 Settings → Branches 单独开启（见仓库层配置，不在代码文件内）。本流程假定保护已开；未开时本流程仍是推荐的最佳实践。**个人私有仓库免费档的分支保护 rulesets 不强制生效**（GitHub 需移入 Team/Enterprise 组织、或仓库改 Public 才会 enforce），当前靠纪律自觉执行，勿误以为 GitHub 会硬拦截。
 - 流程对「无人值守」的意义：AI 开发全程在功能分支完成，把"No / 验收决定权"显式保留给人类在 merge 一刻行使。
+
+---
+
+## 七、CI 安全门禁（基线，安全类 job）
+
+> 若 CI 不只承载静态质量，还希望有"安全门槛"，这是实测可照做的基线组合，能把「构建正确」升级为「构建正确 + 安全护栏」。以下均通用机制，按项目技术栈替换具体工具即可。
+
+### 1. 基线组成（四道，全部常驻、同一轮 push/PR 都跑）
+
+| 门禁 | 作用 | 关键配置 |
+|---|---|---|
+| **最小权限** | 避免 workflow 用默认高权限 token | workflow 顶层 `permissions: {}`（默认全拒），各 job 再按需声明 |
+| **action 固定版本** | 防供应链/依赖混淆 | checkout / setup-node / pnpm-action 等第三方 action **全部 pin SHA**，不用 tag |
+| **SAST 源码扫描** | 扫源码静态漏洞 | 固定扫描工具 pip/二进制版本 + `--error`，命中即失败（如 semgrep：`--config p/default --config p/security-audit --error`） |
+| **workflow 自审计** | 审 `.github/workflows/` 自身安全性 | 固定版本运行（如 zizmor），0 findings 才绿 |
+
+### 2. 漂移守护（防止"被改弱"）
+
+- 用一个独立脚本文本把上述基线的逐项断言写死（检查是否存在 `permissions:{}`、是否有未 pin 的 action、安全配置是否缺失），在 CI 中以一个 job 常驻。
+- 作用：任何人无意识删除安全配置 / 改弱门禁时，CI 直接红，把"安全基线"从口头约定变成机器能盯住的断言。
+
+### 3. 触发机制（门禁不被绕过）
+
+- 安全类 job 与 test 类 job **同一次 push / PR 都执行**，任何一道红即 workflow 红。
+- 不要用"仅 manual dispatch 才跑"的旁路 job 当门禁——否则平时根本不会真正拦截。
+
+### 4. 免费档边界（勿误当成可强制项）
+
+- **CodeQL / 分支保护 rulesets / Require status checks** 在**个人私有仓库免费档不强制生效**（GitHub 须企业/组织账号或 Public 才 enforce）。因此"分支保护硬拦截"仍靠纪律自觉（见 §六），不要误以为 GitHub 会自动强制。
+- CodeQL 仅在获得 GHAS 许可、或用环境变量显式开关（如 `if: vars.ENABLE_CODEQL == 'true'`）时才开启，默认不跑、不进绿线。
+- 会话中把"免费档做不到的强制"识别为现实约束，而不是反复尝试开启。
