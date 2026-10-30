@@ -17,6 +17,7 @@
 
 - **逐一推送**：多个待推送 commit 时，一个一个推，每推一个看一次输出确认成功（如 `c3f922d..6811e8c  6811e8c -> main`），**不要 `git push` 一把梭所有**。理由：commit 多时出错难定位、难回滚；逐一推可让 CI 逐个提交验证，出错即定位到具体那次改动。
 - **快进式递进，绝不 force push、绝不 amend 已推送 commit**。要推某个具体 commit 到某个分支用：`git push origin <commit-hash>:main`。
+- **推送到哪个分支（默认规则）**：默认**功能分支**（`git push -u origin feat/xxx` 后开 PR），直推 `main` 仅在人类明确说"直接推 main / 不走 PR"时使用（见 §六 与协议「分支流程默认档」）。上述 `push <commit>:main` 仅适用于这个明确例外场景，不作为常规操作。
 - 推送前先 `git pull`（或确认本地 `main` 与 `origin/main` 关系），避免分叉。
 
 ### 3. 推送后必须确认「完全同步」
